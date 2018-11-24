@@ -5,3 +5,5 @@
 * [Chapter 1 对象导论 ](BOOK/chapter1.md)
 * [Chapter 2 一切都是对象 ](BOOK/chapter2.md)
 * [Chapter 3 操作符 ](BOOK/chapter3.md)
+* [Chapter 4 控制执行流程 ](BOOK/chapter4.md)
+* [Chapter 5 初始化和清理 ](BOOK/chapter5.md)
