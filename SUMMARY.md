@@ -7,3 +7,5 @@
 * [Chapter 3 操作符 ](BOOK/chapter3.md)
 * [Chapter 4 控制执行流程 ](BOOK/chapter4.md)
 * [Chapter 5 初始化和清理 ](BOOK/chapter5.md)
+* [Chapter 6 访问权限控制 ](BOOK/chapter6.md)
+* [Chapter 7 复用类 ](BOOK/chapter7.md)
