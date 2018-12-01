@@ -9,3 +9,6 @@
 * [Chapter 5 初始化和清理 ](BOOK/chapter5.md)
 * [Chapter 6 访问权限控制 ](BOOK/chapter6.md)
 * [Chapter 7 复用类 ](BOOK/chapter7.md)
+* [Chapter 8 多态 ](BOOK/chapter8.md)
+* [Chapter 9 接口 ](BOOK/chapter9.md)
+
