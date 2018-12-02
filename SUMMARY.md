@@ -11,4 +11,5 @@
 * [Chapter 7 复用类 ](BOOK/chapter7.md)
 * [Chapter 8 多态 ](BOOK/chapter8.md)
 * [Chapter 9 接口 ](BOOK/chapter9.md)
+* [Chapter 10 内部类 ](BOOK/chapter10.md)
 
