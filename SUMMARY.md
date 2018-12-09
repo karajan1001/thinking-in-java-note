@@ -12,4 +12,6 @@
 * [Chapter 8 多态 ](BOOK/chapter8.md)
 * [Chapter 9 接口 ](BOOK/chapter9.md)
 * [Chapter 10 内部类 ](BOOK/chapter10.md)
+* [Chapter 11 持有对象 ](BOOK/chapter11.md)
+* [Chapter 12 通过异常处理错误 ](BOOK/chapter12.md)
 
