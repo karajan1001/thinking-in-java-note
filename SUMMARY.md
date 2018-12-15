@@ -15,4 +15,5 @@
 * [Chapter 11 持有对象 ](BOOK/chapter11.md)
 * [Chapter 12 通过异常处理错误 ](BOOK/chapter12.md)
 * [Chapter 13 字符串 ](BOOK/chapter13.md)
+* [Chapter 14 类型信息 ](BOOK/chapter14.md)
 
