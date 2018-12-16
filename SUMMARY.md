@@ -16,4 +16,5 @@
 * [Chapter 12 通过异常处理错误 ](BOOK/chapter12.md)
 * [Chapter 13 字符串 ](BOOK/chapter13.md)
 * [Chapter 14 类型信息 ](BOOK/chapter14.md)
+* [Chapter 15 泛型 ](BOOK/chapter15.md)
 
