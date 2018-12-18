@@ -83,6 +83,67 @@ void f() throws TooBig, TooSmall, DivZero { //...}
 
 ## 12.6 捕获所有异常
 
+如果捕获类型为异常基类`Exception`则会捕获所有异常。`printStackTrace`方法打印出详细的调用栈轨迹。
+
+### 12.6.1 栈轨迹
+`getStackTrance`方法可以直接返回一个由栈轨迹中元素组成的数组。第一个元素是调用序列中`Throwable`被创建和抛出支出。
+```java
+for (StackTraceElement ste: e.getStackTrace())
+    System.out.println(ste.getMethodName())
+```
+
+### 12.6.2 重新抛出异常
+可以将捕获到的异常重新抛出，下次捕获将获得本次异常完全信息。调用栈也是保持原有环境。如果要将调用栈改变则需要使用方法`fillInStackTrace`
+
+```java
+catch(Exception e) {
+    System.out.println("An exception was thrown");
+    throw e;
+```
+
+### 12.6.3  异常链
+
+可以在捕获一个异常后，抛出另一个异常，同时希望原始信息保存，此时需要异常链。
+
+```java
+AException ae = new AException()
+ae.inCause(new BException());
+throw ae;
+```
+
+## 12.7 Java标准异常
+Java可被抛出的类`Throwable`分为两种：
+- Error: 编译时和系统错误(一般不用关心)。
+- Exception: 库类，用户方法以及运行时候可能抛出的错误。
+
+### 12.7.1 特例: RuntimeException
+比如空指针异常，等等会被JAVA自动抛出，叫做RuntimeException。它们会被JVM自动抛出，而不需要手动进行。如果不进行捕获，异常会直接到达main函数报告给`System.err,我们运行程序报错。
+
+## 12.8 使用finally进行清理
+
+`finally`无论异常是否抛出,都会执行。和python一样。
+
+### 12.8.1 finally可以用来干啥
+
+比如将资源恢复到初始状态，比如已经打开的文件或者网络链接，屏幕上画的图形。
+
+### 12.8.3 在return中使用finally
+多点返回的程序，某些重要清理工作必须进行。
+```java
+try{
+if (i == 1) reutrn;
+if (i == 2) reutrn;
+if (i == 3) reutrn;
+if (i == 4) reutrn;
+}
+finally{
+  print("clean up")
+}
+
+```
+
+### 12.8.4 缺憾，异常丢失
+finally 中如果使用`return`或者`throw Exception`可能会导致异常信息丢失。
 
 ## 12.9 异常的限制
 派生类中的方法能抛出的异常种类，只能是基类中方法的子集，使用接口也不能进行扩展。但是如果使用接口中的方法基类没有，则可以抛出接口中可抛出的异常。构造器与异常关系则参考下一节。
