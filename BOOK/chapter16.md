@@ -33,3 +33,59 @@ int[][] a = {{1,2,3},
              {4,5,6}};
 System.out.println(Arrays.deepToString(a)); // 可以将多维数组转为正确的String。
 ```
+
+数组中构成矩阵的每个向量可以为任意长度（粗糙数组）
+
+## 16.5 数组和泛型
+数组和泛型通常不能很好结合, 比如不能创造一个具有参数化类型的数组,因为数组必须知道确切类型来决定空间分配，一个容器占用的空间是无法确定的。但是可以参数化数组本身, 还有可以创造一个不带参数的数组然后将其转型。
+
+```java
+// List<String>[] ls = new List<String>[];  error
+List<String>[] ls ; 
+List[] la = new List[10];
+ls = (List<String>[]) la; // 会报警但是可以转型成功
+```
+
+> 泛型容器总是比泛型数组更好的选择。
+
+## 16.6 创建测试数据
+
+在实验数组和程序的时候，可以用特殊方法和对象来填充。
+
+### 16.6.1 Arrays.fill()
+此条命令可以填充整个数组或者数组中某个区域。
+```java
+
+int[] a5 = new int[6];
+Arrays.fill(a5, 19);
+int[] a9 = new String[6];
+Arrays.fill(a9, 'Hello');
+Arrays.fill(a9, 3, 5, 'World');
+print(" a5 = " + Arrays.toString(a5));
+print(" a9 = " + Arrays.toString(a9));
+```
+比如结果为
+```bash
+> a = [19,19,19,19,19,19]
+> a9 = [Hello, Hello, Hello, World, World, Hello]   
+```
+
+### 16.6.2 数据生成器
+
+```java
+public class CountingGenerator{
+    public static class Boolean implements Generator<java.lang.Boolean> {
+        private boolean value = false;
+        public java.lang.Boolean next()P
+            value = !value;
+            reutrn value;
+        }
+}
+```
+然后一直调用next就能生成值。
+
+### 16.6.3 从Generator中创建数组
+可以使用`CollectionData`用生成器来填充数组。
+```java
+new CollectionData<T>(gen, length).toArray(a);
+```
