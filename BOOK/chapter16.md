@@ -89,3 +89,34 @@ public class CountingGenerator{
 ```java
 new CollectionData<T>(gen, length).toArray(a);
 ```
+
+## 16.7 Arrays 实用功能o
+###  16.7.1 赋值数组
+```java
+int[] i = new int[7];
+int[] j = new int[10];
+Array.fill(i, 47);
+Array.fill(j, 99);
+
+System.arraycopy(i, 0, j, 0, i.length); // 从 i的0开始往j的0复制i.length个元素
+
+```
+
+### 16.7.2 数组的比较
+```java
+Arrays.equals(a1,a2); // 每个元素都相等才相等
+```
+
+### 16.7.3 数组元素的比较
+实现了`Comparable`接口的类可以使用标准库的`Arrays.sort()`比较并排序
+
+### 16.7.4 数组的排序
+排序使用的是`quicksort`算法
+
+### 16.7.5 在已排序的数组中查找
+对于已经排序的数组可以使用`Arrays.binarySearch()`进行快速查找
+
+
+## 16.8 总结
+
+本章是Java对固定的低级数组提供了适度支持。在所有的场合都应该优先使用容器而不是数组，除非容器的性能称为瓶颈。
