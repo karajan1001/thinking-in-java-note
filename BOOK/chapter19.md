@@ -53,3 +53,40 @@ switch(s){
 ```
 
 ## 19.7 使用接口组织枚举
+在接口内部创建实现该接口的枚举类型，可以实现元素分组，
+
+```java
+public interface Food{
+    enum Appetize implements Food{
+        SALAD, SOUP, SPRING_ROLLS;
+    }
+    enum MainCourse implements Food{
+        LASAGNE, BURRITO, PAD_THAI;
+    }
+}
+Food food = Appetizer.SALAD;
+food = MainCouse.BURRITO;
+```
+
+更好的方法是创建新的枚举类型，包装Food中的每一个enmu类。更简洁的方法是将一个enmu 嵌套在另一个enum里面。
+
+## 19.8 使用EnumSet替代表标志
+可以用来代表比特位，使用方法为:
+```java
+
+public enum AlarmPoints{
+    STAIR1, STAIR2, STAIR3, STAIR4  
+}
+EnumSet<AlarmPoints> points = EnmuSet.nonOf(AlarmPoints.class); // 设为空，全0
+points.addAll(EnumSet.of(Stair1, Stair2)); // 1号,2号开关打开
+points.allOf(AlarmPoints.class); // 1号,2号开关打开
+points.RemoveAll(EnumSet.of(Stair1, Stair4)); // 1号,4号开关关闭
+```
+
+## 19.9 使用EnumMap
+一种特殊的Map，Key来自一个enum。
+```java
+interface Command( void action();}
+EnmuMap<AlarmPoints,Command> em = new EnumMap<AlarmPoints,Command>(AlarmPoints.class);
+```
+
