@@ -90,3 +90,32 @@ interface Command( void action();}
 EnmuMap<AlarmPoints,Command> em = new EnumMap<AlarmPoints,Command>(AlarmPoints.class);
 ```
 
+## 19.10 常量相关的方法
+enum实例可以编写方法，从而为每个实例赋予不同行为。为了实现这个可以为`enum`实现一个或者多个不同的抽象或者普通方法，然后覆盖它们。看起来似乎每个实例都像一个继承的类，但是并不能将实例当做类来用。
+```java
+public enum ConstantSpecificMethod {
+	 DATE_TIME {
+	    String getInfo() {
+	      return
+	        DateFormat.getDateInstance().format(new Date());
+	    }
+	  },
+	  VERSION {
+	    String getInfo() {
+	      return System.getProperty("java.version");
+	    }
+	  };
+	  abstract String getInfo();
+}
+```
+
+#### 19.10.1 使用enum职责链
+可以使用职责链设计模式，处理问题。
+
+#### 19.10.2 使用enum状态机
+也可以用enum来创造状态机
+
+## 19.11 多路分发
+
+
+
