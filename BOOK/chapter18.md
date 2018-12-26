@@ -148,3 +148,85 @@ PipedInputStream、PipedOutputStream、PipedReader、PipedWrited 的价值会在
 
 ### 18.7.1 读取一个二进制文件
 同上文本文件，对读取写入做了一些封装。
+
+## 18.8 标准I/O
+参考的是 Unix 中 “程序所使用的单一信息流” 这个概念。程序的所有输入都可以来自于标准输入，它的所有输出都可以发送到标准输出，以及所有的错误信息都可以发送到标准错误。标准 I/O 的意义在于：我们可以很容易的把程序串联起来，一个程序的标准输出可以成为另一个程序的标准输入。
+
+### 18.8.1 从标准输入中读取
+`out`和`err`都被事先包装成了`PrintStream`，但是`System.in`没有包装过的`InputStream`。读取`System.in`之前必须对其进行包装。
+```java
+BufferedReader std = new BufferedReader(new InputStreamReader(System.in));
+String string;
+try {
+	while ((string = std.readLine()) != null && string.length() != 0) {
+		System.out.println(string);
+	}
+} catch (IOException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
+```
+### 18.8.2 将System.out转为PrintWriter
+可以通过构造器将`Syatem.out`转换成`PrintWriter`。
+```java
+PrintWriter out = new PrintWriter(System.out,true);
+```
+
+### 18.8.3 标准I/O重定向
+可以用如下方法重定向输入输出。
+- setIn(InputStream)
+- setOut(PrintStream)
+- setErr(PrintStream)
+```java
+BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream("D:/eclipseWorkspace/ThreadTest/src/ioone/Redirecting.java"));
+PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream("test.out")));
+System.setIn(inputStream);
+System.setOut(out);
+```
+
+## 18.9 进程控制
+运行程序需要使用`OSExecute.command()`。而捕获标准获程序执行时产生的标准输出流，需要调用`getInputStream()`。
+
+## 18.10 新I/O
+新I/O类库在JKD1.4中引入，存在于`java.nio.*`中，目的是提高速度。主要是使用了缓冲区, 引入了`ByteBuffer`类用于存储未加工的比特流。`FileInputStream`、`FileOutputStream`以及`RandomAccessFile`被修改用以产生`FileChannel`。`java.nio.channels.Channels`类提供了实用方法，用以在通道中产生`Reader`和`Writer`。 
+```java
+// 写文件
+FileChannel fChannel = new FileOutputStream("data.txt").getChannel();
+fChannel.write(ByteBuffer.wrap("Some text".getBytes()));
+fChannel.close();
+
+// 读写文件
+fChannel = new RandomAccessFile("data.txt","rw").getChannel();
+fChannel.position(fChannel.size());
+fChannel.write(ByteBuffer.wrap("Some more".getBytes()));
+fChannel.close();
+
+//读文件
+fChannel = new FileInputStream("data.txt").getChannel();
+ByteBuffer buffer = ByteBuffer.allocate(BSIZE);
+fChannel.read(buffer);
+buffer.flip();
+while (buffer.hasRemaining()) {
+	System.out.print((char)buffer.get());
+}
+```
+读取数据到`ByteBuffer`可以使用`put`或者`wrap`。写入数据则要确定缓存大小使用`allocate`。缓存的大小影响`nio`模块的性能。
+
+### 18.10.1 转换数据
+
+读取和写入的`ByteBuffer`都是字节的形势，要将其变成字符需要编码和解码。解码可以使用`java.nio.CharBuffer`中的`toString`，编码使用`getBytes`方法后面带上需要编码的类型。
+```java
+buff = ByteBuffer.allocate(24); // More than needed
+buff.asCharBuffer().put("Some text");
+```
+
+### 18.10.2 获取基本类型
+可以使用:`asCharBuffer`,`asShortBuffer`,`asLongBuffer`,`asIntBuffer`,`asFloatBuffer`。写入基本类型数据
+
+### 18.10.3 视图缓冲器
+视图缓冲器可以让我们通过某种特定的基本数据类型的视窗查看器底层的 ByteBuffer。可以像C 一样控制每个基本类型占据的比特位。
+
+#### 字节存放次序
+
+
+
