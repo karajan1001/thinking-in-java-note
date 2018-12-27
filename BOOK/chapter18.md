@@ -227,6 +227,44 @@ buff.asCharBuffer().put("Some text");
 视图缓冲器可以让我们通过某种特定的基本数据类型的视窗查看器底层的 ByteBuffer。可以像C 一样控制每个基本类型占据的比特位。
 
 #### 字节存放次序
+不同的机器，可能采用不同的字节排序方式来存放数据。
 
+### 18.10.4 用缓冲器操纵数据
+`ByteBuffer`使用`wrap`包装数据然后通过`channel`将数据输出到文件中。
+
+### 18.10.5 缓冲器的细节
+`Buffer`由数据和可以高效的访问以及操作这些数据的四个索引组成，这四个索引是：mark (标记)、position (位置)、limit (界限) 和 capacity (容量)。
+```java
+while(buffer.hasRemaining()) {
+	//将mark 设置为 position
+  buffer.mark();
+  char c1 = buffer.get();
+  char c2 = buffer.get();
+  buffer.reset(); // 将 position 设为 mark
+  buffer.put(c2).put(c1);
+}
+```
+### 18.10.6 内存映射文件
+有了内存映射文件，我们就可以假定整个文件都放在内存中，而且可以完全把他当做非常大的数组来访问。这种方法极大的简化了修改文件的代码。这里需要使用`MappedByteBuffer`
+```java
+MappedByteBuffer out =new RandomAccessFile("test.dat", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, length);
+```
+#### 性能
+相比`io`,`nio`可以显著提升性能。
+### 18.10.7 文件加锁
+JDK 1.4 引入了文件加锁的机制，它允许我们同步访问某个文件作为共享资源的文件。通过对 FileChannel 调用 tryLock() 或者 lock()，就可以获得整个文件的 FileLock。tryLock() 是非阻塞式的，它设法获取锁，但是如果不能获取将直接从方法调用处返回。lock() 则是阻塞式的，他要阻塞进程直至锁可以获得，或调用 lock() 的线程中断，或调用 lock() 的通道关闭。使用 FileLock.release() 可以释放锁。具体使用为
+```java
+FileLock fLock = fOutputStream.getChannel().tryLock();
+if (fLock != null) {
+	System.out.println("加锁文件");
+	TimeUnit.MILLISECONDS.sleep(100);
+	fLock.release();
+	System.out.println("解锁");
+}
+fOutputStream.close();
+```
+除了对整个文件加锁还能只对文件的一部分进行，这时候需要传入参数位置和大小。
+
+## 18.11 压缩
 
 
