@@ -266,5 +266,37 @@ fOutputStream.close();
 除了对整个文件加锁还能只对文件的一部分进行，这时候需要传入参数位置和大小。
 
 ## 18.11 压缩
+压缩当然都是字节不是字符,最常用是Zip和Gzip。
 
+### 18.11.1 利用 GZIP 进行简单压缩
+使用方法比较简单，在`buffer`和`file`之间加上一层Gzip即可。
 
+```java
+BufferedOutputStream outputStream = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream("test.gz")));
+BufferedReader ins = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream("test.gz"))));
+
+```
+
+### 18.11.2 用 ZIP 进行多文件保存
+支持 ZIP 格式的 Java 库更加全面。利用该库可以方便的保存多个文件，他甚至有一个独立的类，使得读取 ZIP 文件更加方便。
+```java
+ZipFile zf = new ZipFile("test.zip");
+ZipEntry ze;	
+```
+对于每一个要加入压缩文档的文件，都必须调用 putNextEntry()，并将其传递一个 ZipEntry 对象。ZipEntry 对象包含了一个很广泛的接口，允许你获取和设置 ZIP 文件内该特定项上所有可利用的数据：名字、压缩和未压缩的文件大小、日期、CRC 校验和、额外字段数据、注释、压缩方法以及它是否是一个目录入口等等。
+### 18.11.3 Java 档案文件
+Zip 格式也被广泛应用于 JAR 文件格式中。这种文件格式就像 Zip 一样，可以将一组文件压缩到一组文件中。同 Java 中其他文件一样， JAR 文件也是跨平台的。声音和图像文件可以像类文件一样被包含在其中。
+
+## 18.12 对象序列化
+## 18.12.1 寻找类
+## 18.12.2 序列化的控制
+## 18.12.3 使用持久化
+
+## 18.13 XML
+序列化和反序列化只有Java才可以，XML和json一样支持多种不同语言。包括随 jdk 发布的 Javax.xml.\* 类库。这里我们使用 Elliotte Rusty Harold 的开源 XOM 类库，因为这个看起来更简单，同时也是最直观的用 Java 产生和修改 XML 的方式。
+
+## 18.14 Preferences
+Preferences 是一个键值集合，存储在一个节点层次结构中。节点层次结构可以创建更为复杂的结构，但通常是创建以你的类名命名的单一节点，然后将信息存储于其中。Preferences API 用于存储和读取用户的偏好以及程序配置项的设置。
+
+## 18.15 总结
+有装饰器模式后的JavaI/O才是完整的。
