@@ -314,7 +314,7 @@ sleep时进入阻塞状态，还有等待网络返回结果等。
 #### 进入阻塞状态
 进入阻塞的原因有：
 - 通过调用 sleep() 使任务进入休眠状态，在这种情况下任务在指定的时间内不会运行。
-- 你通过调用 wait() 使线程挂起。直到线程得到了 notif() 或 notifall() 消息，线程才会进入就绪状态。
+- 你通过调用 wait() 使线程挂起。直到线程得到了 notify() 或 notifyall() 消息，线程才会进入就绪状态。
 - 任务在等待某个输入或输出完成。
 - 任务试图在某个对象上调用其同步控制方法，但是对象锁不可用，因为另一个任务已经获取了锁。
 
@@ -358,6 +358,129 @@ try {
 	nCleanup.cleanup();
 }
 ```
+
+## 21.5 线程之间的协作
+`wait()`可以使你等待某个条件发生变化，而改变这个条件通常是由另一个任务来改变。比如`notify()`或`notifyAll()`发生时，这个任务才会被唤醒并去检查所发生的变化。因此，wait() 提供了一种在任务之间对活动同步的方式。 
+
+#### wait与sleep区别
+调用 sleep() 时候锁并没有被释放，调用 yield() 也是一样。当一个任务在方法里遇到对 wait() 调用时，线程执行被挂起，对象的锁被释放。
+
+#### 有两种形式的 wait():
+
+- 接受毫秒作为参数:指再次暂停的时间。
+   1. 在 wait() 期间对象锁是被释放的。
+   1. 可以通过 notify() 或 notifyAll()，或者指令到期，从 wait() 中恢复执行。
+- 不接受参数的 wait().
+   1. 这种 wait() 将无线等待下去，直到线程接收到 notify() 或 notifyAll()。
+
+只能在同步方法或者同步代码块里调用 wait()、notify() 或者 notifyAll()。如果在非同步代码块里操作这些方法，程序可以通过编译，但是在运行时会得到 IllegalMonitorStateException 异常。
+
+### 21.5.1 wait()与notifyAll()
+```java
+public class Car {
+  //涂蜡和抛光的状态
+	private boolean waxOn = false;
+	//打蜡
+	public synchronized void waxed() {
+		waxOn = true;
+		notifyAll();
+	}
+
+	//抛光
+	public synchronized void buffed() {
+		waxOn = false;
+		notifyAll();
+	}
+
+	//抛光结束被挂起即将开始打蜡任务
+	public synchronized void waitForWaxing() throws InterruptedException{
+		while (waxOn == false) {
+			wait();
+		}
+	}
+
+	//打蜡结束被挂起即将开始抛任务
+	public synchronized void waitForBuffing() throws InterruptedException{
+		while (waxOn == true) {
+			wait();
+		}
+	}
+}
+
+```
+调用执行器的`shutdownNow`会对所有控制的线程调用`interrupt`,`while`很重要，这样如果条件不足，挂起会继续。
+
+#### 错失的信号
+等待的条件也要放到临界区域内，不然可能会一直卡住。
+```java
+synchronized(x){
+  while(someCondition){
+    x.wait();
+  }
+}
+```
+### 21.5.2 notify()与notifyAll()
+使用 notify() 时，在众多等待同一个锁的任务中只有一个被唤醒，因此如果你希望使用 notify()，就必须保证被唤醒的是恰当的任务。当 notifyAll() 因某个特定锁被调用时，只有等待这个锁的任务才会被唤醒。
+
+### 21.5.3 生产者与消费者
+一个生产者和消费者的例子。
+### 21.5.4 生产者-消费者与队列
+上述例子更好的方法是使用队列`Java.util.concurrent.BlockingQueue`如果使用`ArrayBlockingQueue`则是一个固定尺寸队列。使用`put`放入元素使用`take`取出元素。
+
+```java
+public class LiftOffRunner implements Runnable{
+	private BlockingQueue<LiftOff> rockets;
+
+    public void add(LiftOff lo) {
+		try {
+			rockets.put(lo);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("添加失败");
+		}
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			while (!Thread.interrupted()) {
+				LiftOff rocket = rockets.take();
+				rocket.run();
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("运行中断");
+		}
+		System.out.println("退出运行");
+	}
+
+}
+
+
+```
+### 21.5.5 任务间使用管道进行输入/输出
+`PipedWriter`类和`PipedReader`类可以对线程间输入输出提供支持。这个模型可以看成生产-消费模型的辩题。
+
+
+## 21.6 死锁
+著名的哲学家吃饭的问题。只有四个条件全部满足才会发生死锁
+
+- 互斥条件。任务使用的资源中至少有一个是不能共享的。
+- 至少有一个任务必须持有一个资源，并且正在等待获取一个当前被别的任务持有的资源。也就是说必须是拿着一根筷子等待另一个筷子。
+- 资源不能被任务抢占，任务必须把资源释放当做普通事件。你不能抢别人手里的筷子。
+- 必须有循环等待，这时一个任务等待其他任务所持有的资源，后者又在等待另一个任务所持有的资源，这样循环下去直到有一个任务等待第一个任务所持有的资源，使得大家都被锁住。
+一般通过破坏第四个循环条件解决死锁问题。
+
+## 21.7 新类库中的构件
+
+## 21.8 仿真
+
+## 21.9 性能调优
+
+## 21.10 活动对象
+
+## 21.11 总结
 
 
 
