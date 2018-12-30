@@ -20,4 +20,7 @@
 * [Chapter 16 数组 ](BOOK/chapter16.md)
 * [Chapter 17 容器深入研究 ](BOOK/chapter17.md)
 * [Chapter 18 JAVA I/O系统 ](BOOK/chapter18.md)
+* [Chapter 19 枚举类型 ](BOOK/chapter19.md)
+* [Chapter 20 注解 ](BOOK/chapter20.md)
+* [Chapter 21 并发 ](BOOK/chapter21.md)
 
