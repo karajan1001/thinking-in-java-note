@@ -288,9 +288,98 @@ ZipEntry ze;
 Zip 格式也被广泛应用于 JAR 文件格式中。这种文件格式就像 Zip 一样，可以将一组文件压缩到一组文件中。同 Java 中其他文件一样， JAR 文件也是跨平台的。声音和图像文件可以像类文件一样被包含在其中。
 
 ## 18.12 对象序列化
+Java 对象序列化将那些实现了 Serializable 接口的对象转换为一个字节序列，并能够在以后将这个字节序列完全恢复为原来的对象。这样对象可以跨网络，跨平台重构出来。利用对象的序列化可以实现轻量级持久性。只要对象实现了 Serializable 接口。序列化就实现了，这是非常简单的。要序列化一个对象首先要创建某些 OutputStream 对象，然后将其封装成一个 ObjectOutputStream 对象内。这时，调用 writeObject() 即可将对象序列化，并将其发送给 OutputStream。要反向进行该过程，需要将一个 InputStream 封装在 ObjectInputStream 内，然后调用 readObject()。和之前一样我们会获得一个引用，它指向一个向上转型的 Object，所以必须向下转型才能直接设置它们。Java对象的序列化还会自动追踪对象持有的其他对象并对他们进行序列化。最后形成一张对象网。
+```java
+ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("worm.out"));
+out.writeObject(w);
+out.close();
+
+ObjectInputStream in = new ObjectInputStream(new FileInputStream("worm.out"));
+String string = (String)in.readObject();
+Worm w2 = (Worm)in.readObject();
+```
+
 ## 18.12.1 寻找类
+要实现反序列化，除了得到序列化后的文件，远程机器还必须能得到这个类的定义。所以类的路径必须是 Java 虚拟机能够找到的路径。
+
 ## 18.12.2 序列化的控制
-## 18.12.3 使用持久化
+要精确控制序列化，可以通过实现 Externalizable 接口代替实现 Serializable 接口。 Externalizable 接口继承了 Serializable 接口，同时添加了两个方法：writeExternal() 和 readExternal()。这两个方法会在序列化和反序列化还原的过程中被自动调用，以便执行一些特殊的操作。。对于 Serializable 对象完全以它存储的二进制为基础来构造，而不调用构造器。而对于一个 Externalizable 对象，所有的普通的默认构造器都会被调用，然后调用 readExternal()。必须注意这一点：所有的默认构造器都会被调用，才能使 Externalizable 对象产生正确的行为。
+```java
+protected Blip3(int i, String s) {
+	super();
+	System.out.println("有参数的构造函数");
+	this.i = i;
+	this.s = s;
+}
+
+@Override
+public void writeExternal(ObjectOutput out) throws IOException {
+	System.out.println("序列化对象");
+	out.writeObject(s);
+	out.writeInt(i);
+
+}
+
+@Override
+public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+	System.out.println("恢复对象");
+	s = (String)in.readObject();
+	i = in.readInt();
+}
+
+```
+
+要完整恢复一个对象必须实现它的构造器，序列化时需要将参数手动写入，读取时需要手动读取，不然参数会是默认值而不会恢复。
+
+#### transient (瞬时) 关键字
+
+如果不想自己实现`Externalizable`又想在序列化时不保存某些对象，可以使用`transient`将其设为瞬时字段。
+
+
+```java
+public class Logon implements Serializable{
+
+	  private Date date = new Date();
+	  private String username;
+	  //不需要保存
+	  private transient String password;
+	  public Logon(String name, String pwd) {
+	    username = name;
+	    password = pwd;
+	  }
+}
+```
+
+#### Externalizable 的替代方法
+除了使用`Externalizable`,还有另外一种方法就是添加名为 writeObject() 和 readObject() 的方法。注意是添加既不是覆盖也不是实现。这样在序列化时会自动调用而不是默认的自动化机制。
+
+```java
+public class SerialCtl implements Serializable {
+	  private String a;
+	  private transient String b;
+	  public SerialCtl(String aa, String bb) {
+	    a = "Not Transient: " + aa;
+	    b = "Transient: " + bb;
+	  }
+	  public String toString() { return a + "\n" + b; }
+	  private void writeObject(ObjectOutputStream stream)throws IOException {
+	    stream.defaultWriteObject(); // 保存a
+	    stream.writeObject(b); //保存b
+	  }
+
+	  private void readObject(ObjectInputStream stream)throws IOException, ClassNotFoundException {
+	    stream.defaultReadObject();
+	    b = (String)stream.readObject();
+	  }
+}
+
+```
+#### 版本控制
+
+有时可能想要改变可序列化的版本。虽然 Java 支持这种做法，但是却可能只在特殊情况下才这么做，此外，需要对它有相当深的了解。这是因为 Java 的版本控制机制过于简单，因而不能在任何场合可靠的运转。需要深入了解看 JDK 的文档。
+
+### 18.12.3 使用持久化
+如果我们将两个对象序列化，他们都具有指向第三个对象的引用。当我们从序列化状态恢复这两个对象时系统无法知道另外一个流内的对象别名，因此会产生不同的对象网。如果我们想保存系统的状态，最安全的办法是将其作为原子操作进行序列化。如果我们序列化了某些东西，再去做其他的一些工作，那么将无法安全的保存系统状态。尽管 Class 类是 Serializable 的，但是却不能序列化静态类型的数据。加入想要序列化 static 必须手动实现。比如 Line 类中的哪样。serializeStaticState() 和 deserializeStaticState() 作为存储和读取过程的一部分被显式的调用。注意:必须维护写入和读取的顺序。
 
 ## 18.13 XML
 序列化和反序列化只有Java才可以，XML和json一样支持多种不同语言。包括随 jdk 发布的 Javax.xml.\* 类库。这里我们使用 Elliotte Rusty Harold 的开源 XOM 类库，因为这个看起来更简单，同时也是最直观的用 Java 产生和修改 XML 的方式。
